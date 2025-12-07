@@ -12,6 +12,6 @@ function getApiUrl(): string {
 
 export const environment = {
   production: true,
-  apiUrl: getApiUrl()
+  apiUrl: '/api'
 };
 
