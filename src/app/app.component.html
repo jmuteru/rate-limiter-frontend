@@ -3,29 +3,29 @@
   
   <div class="card">
     <!-- material UI tabs -->
-    <mat-tab-group [(selectedIndex)]="activeTab" animationDuration="300ms">
+    <mat-tab-group [(selectedIndex)]="activeTab" animationDuration="300ms" (selectedIndexChange)="onTabChange($event)">
       <!-- client management -->
       <mat-tab label="Client Management">
         <div class="tab-content">
-          <app-client-management></app-client-management>
+          <app-client-management #clientManagement></app-client-management>
         </div>
       </mat-tab>
       <!-- global limits -->
       <mat-tab label="System Global Limits">
         <div class="tab-content">
-          <app-system-limit-config></app-system-limit-config>
+          <app-system-limit-config #systemLimitConfig></app-system-limit-config>
         </div>
       </mat-tab>
       <!-- rate limit configs -->
       <mat-tab label="Client Rate Limit Configurations">
         <div class="tab-content">
-          <app-rate-limit-config></app-rate-limit-config>
+          <app-rate-limit-config #rateLimitConfig></app-rate-limit-config>
         </div>
       </mat-tab>
       
       <mat-tab label="Test Notifications">
         <div class="tab-content">
-          <app-notification-test></app-notification-test>
+          <app-notification-test #notificationTest></app-notification-test>
         </div>
       </mat-tab>
     </mat-tab-group>

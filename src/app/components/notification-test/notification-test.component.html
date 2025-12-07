@@ -43,7 +43,7 @@
   </button>
 </form>
 
-<div *ngIf="results.length > 0" style="margin-top: 24px;">
+<div *ngIf="loading || results.length > 0" style="margin-top: 24px;">
   <h3>Test Results</h3>
   <table>
     <thead>
@@ -55,18 +55,32 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let result of results; let i = index" [style.background-color]="result.status === 200 ? '#d4edda' : '#f8d7da'">
+      <tr *ngFor="let result of results; let i = index; trackBy: trackByIndex"
+          [style.background-color]="result.pending ? '#fff' : (result.error ? '#f8d7da' : (result.status === 200 ? '#d4edda' : '#f8d7da'))"
+          [style.opacity]="result && !result.pending ? '1' : '0.6'">
         <td>{{ i + 1 }}</td>
-        <td>{{ result.status }}</td>
-        <td>{{ result.message }}</td>
         <td>
-          <small *ngIf="result.headers">
-            TimeWindow: {{ result.headers['x-ratelimit-timewindow-remaining'] || 'N/A' }}<br>
-            Monthly: {{ result.headers['x-ratelimit-monthly-remaining'] || 'N/A' }}<br>
-            Global: {{ result.headers['x-ratelimit-global-remaining'] || 'N/A' }}
-          </small>
-          <small *ngIf="!result.headers" style="color: #999;">No headers received</small>
+          <span *ngIf="result.pending">Pending...</span>
+          <span *ngIf="!result.pending">{{ result.status }}</span>
         </td>
+        <td>
+          <span *ngIf="result.pending">Waiting for response...</span>
+          <span *ngIf="!result.pending">{{ result.message }}</span>
+        </td>
+        <td>
+          <span *ngIf="result.pending" style="color:#999">Pending</span>
+          <ng-container *ngIf="!result.pending">
+            <small *ngIf="result.headers">
+              TimeWindow: {{ result.headers['x-ratelimit-timewindow-remaining'] || 'N/A' }}<br>
+              Monthly: {{ result.headers['x-ratelimit-monthly-remaining'] || 'N/A' }}<br>
+              Global: {{ result.headers['x-ratelimit-global-remaining'] || 'N/A' }}
+            </small>
+            <small *ngIf="!result.headers" style="color: #999;">No headers received</small>
+          </ng-container>
+        </td>
+      </tr>
+      <tr *ngIf="!loading && (!results || results.length === 0)">
+        <td colspan="4" style="text-align:center;color:#888;font-style:italic;">No results / All requests failed.</td>
       </tr>
     </tbody>
   </table>

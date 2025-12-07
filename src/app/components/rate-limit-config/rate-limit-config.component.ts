@@ -17,9 +17,6 @@ export class RateLimitConfigComponent implements OnInit, OnDestroy {
   clients: Client[] = [];
   showForm = false;
   isEditMode = false;
-  allowManualEntry = false;
-  message = '';
-  messageType = 'info';
   private refreshInterval?: any;
 
   constructor(
@@ -97,7 +94,7 @@ export class RateLimitConfigComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         const errorMsg = this.getErrorMessage(err);
-        this.showMessage('Error loading configurations: ' + errorMsg, 'error');
+        // this.showMessage('Error loading configurations: ' + errorMsg, 'error'); // REMOVED
       }
     });
   }
@@ -105,44 +102,44 @@ export class RateLimitConfigComponent implements OnInit, OnDestroy {
   onSubmit() {
     // Validate form
     if (!this.config.clientId || !this.config.clientId.trim()) {
-      this.showMessage('Client ID is required', 'error');
+      // this.showMessage('Client ID is required', 'error'); // REMOVED
       return;
     }
     if (!this.config.timeWindowRequests || this.config.timeWindowRequests < 1) {
-      this.showMessage('Time Window Requests must be at least 1', 'error');
+      // this.showMessage('Time Window Requests must be at least 1', 'error'); // REMOVED
       return;
     }
     if (!this.config.timeWindowSeconds || this.config.timeWindowSeconds < 1) {
-      this.showMessage('Time Window Seconds must be at least 1', 'error');
+      // this.showMessage('Time Window Seconds must be at least 1', 'error'); // REMOVED
       return;
     }
     if (!this.config.monthlyRequests || this.config.monthlyRequests < 1) {
-      this.showMessage('Monthly Requests must be at least 1', 'error');
+      // this.showMessage('Monthly Requests must be at least 1', 'error'); // REMOVED
       return;
     }
 
     if (this.isEditMode) {
       this.rateLimitService.updateConfig(this.config.clientId, this.config).subscribe({
         next: () => {
-          this.showMessage('Configuration updated successfully', 'success');
+          // this.showMessage('Configuration updated successfully', 'success'); // REMOVED
           this.loadConfigs();
           this.resetForm();
         },
         error: (err) => {
           const errorMsg = this.getErrorMessage(err);
-          this.showMessage('Error updating configuration: ' + errorMsg, 'error');
+          // this.showMessage('Error updating configuration: ' + errorMsg, 'error'); // REMOVED
         }
       });
     } else {
       this.rateLimitService.createConfig(this.config).subscribe({
         next: () => {
-          this.showMessage('Configuration created successfully', 'success');
+          // this.showMessage('Configuration created successfully', 'success'); // REMOVED
           this.loadConfigs();
           this.resetForm();
         },
         error: (err) => {
           const errorMsg = this.getErrorMessage(err);
-          this.showMessage('Error creating configuration: ' + errorMsg, 'error');
+          // this.showMessage('Error creating configuration: ' + errorMsg, 'error'); // REMOVED
         }
       });
     }
@@ -185,12 +182,12 @@ export class RateLimitConfigComponent implements OnInit, OnDestroy {
     if (confirm(`Are you sure you want to delete configuration for client ${clientId}?`)) {
       this.rateLimitService.deleteConfig(clientId).subscribe({
         next: () => {
-          this.showMessage('Configuration deleted successfully', 'success');
+          // this.showMessage('Configuration deleted successfully', 'success'); // REMOVED
           this.loadConfigs();
         },
         error: (err) => {
           const errorMsg = this.getErrorMessage(err);
-          this.showMessage('Error deleting configuration: ' + errorMsg, 'error');
+          // this.showMessage('Error deleting configuration: ' + errorMsg, 'error'); // REMOVED
         }
       });
     }
@@ -203,24 +200,16 @@ export class RateLimitConfigComponent implements OnInit, OnDestroy {
   showNewForm() {
     this.config = this.getDefaultConfig();
     this.isEditMode = false;
-    this.allowManualEntry = false;
     this.showForm = true;
-    this.loadClients(); // Refresh clients list
+    this.loadClients();
   }
 
   resetForm() {
     this.config = this.getDefaultConfig();
     this.isEditMode = false;
-    this.allowManualEntry = false;
     this.showForm = false;
   }
 
-  showMessage(msg: string, type: string) {
-    this.message = msg;
-    this.messageType = type;
-    setTimeout(() => {
-      this.message = '';
-    }, 5000);
-  }
+  // REMOVE the showMessage method and all this.message/this.messageType lines
 }
 

@@ -1,16 +1,30 @@
 <div *ngIf="message" [class]="'alert alert-' + messageType">{{ message }}</div>
 
-<form (ngSubmit)="onSubmit()">
+<form (ngSubmit)="onSubmit()" #form="ngForm">
   <div class="form-group">
     <label>Global Requests Per Second *</label>
-    <input type="number" [(ngModel)]="config.globalRequestsPerSecond" name="globalRequestsPerSecond" required min="1">
+    <input
+      type="number"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      step="1"
+      min="1"
+      [(ngModel)]="config.globalRequestsPerSecond"
+      name="globalRequestsPerSecond"
+      required
+      style="appearance: textfield;"
+      #globalRequestsPerSecondInput="ngModel"
+    >
     <small style="color: #666; display: block; margin-top: 4px;">
       Maximum number of requests allowed across all clients per second
     </small>
+    <span class="validation-error" *ngIf="globalRequestsPerSecondInput.invalid && globalRequestsPerSecondInput.touched">
+      <span *ngIf="globalRequestsPerSecondInput.errors?.['required']">Global Requests Per Second is required</span>
+      <span *ngIf="globalRequestsPerSecondInput.errors?.['min']">Global Requests Per Second must be at least 1</span>
+    </span>
   </div>
-  
   <div>
-    <button type="submit">Update System Limits</button>
+    <button type="submit" [disabled]="form.invalid">Update System Limits</button>
   </div>
 </form>
 

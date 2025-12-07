@@ -100,7 +100,8 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
     }
 
     this.loading = true;
-    this.results = []; // clear previous results
+    this.results = [{pending:true}];
+    this.cdr.detectChanges();
     const service = this.notificationType === 'email' 
       ? this.notificationService.sendEmail(this.request, this.clientId)
       : this.notificationService.sendSMS(this.request, this.clientId);
@@ -109,51 +110,31 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         const headers: any = {};
         if (response.headers) {
-          // get all header names
           const headerKeys = response.headers.keys();
           headerKeys.forEach((key: string) => {
             const value = response.headers.get(key);
             headers[key.toLowerCase()] = value;
           });
         }
-        
         const status = response.status || 200;
-        this.results = [{
+        this.results[0] = {
           status: status,
           message: response.body?.message || 'Success',
           headers: headers
-        }];
-        
-        this.cdr.detectChanges(); // Force change detection
+        };
+        this.cdr.detectChanges();
         this.toastService.success('Notification sent successfully');
         this.loading = false;
       },
       error: (err: HttpErrorResponse | any) => {
         const headers: any = {};
-        
-        // try to get headers from error response 
-        if (err instanceof HttpErrorResponse && err.headers) {
+        if (err.headers) {
           try {
             err.headers.keys().forEach((key: string) => {
               headers[key.toLowerCase()] = err.headers.get(key);
             });
-          } catch (e) {
-            // Silently handle header extraction errors
-          }
-        } else if (err.headers) {
-          // fallback for other error types
-          try {
-            if (typeof err.headers.keys === 'function') {
-              err.headers.keys().forEach((key: string) => {
-                headers[key.toLowerCase()] = err.headers.get(key);
-              });
-            }
-          } catch (e) {
-            // Silently handle header extraction errors
-          }
+          } catch (e) {}
         }
-        
-        // figure out the message based on status code
         let message = 'Request failed';
         if (err.status === 429) {
           message = 'Rate limit exceeded (429) .This is expected when testing rate limiting';
@@ -162,20 +143,17 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
         } else if (err.message) {
           message = err.message;
         }
-        
-        const result = {
+        this.results[0] = {
           status: err.status || 'Error',
           message: message,
-          headers: headers
+          headers: headers,
+          error: true
         };
-        this.results = [result];
-        this.cdr.detectChanges(); // force change detection
-        
-        // show different toast based on status
+        this.cdr.detectChanges();
         if (err.status === 429) {
           this.toastService.warning('Rate limit exceeded - Check results table for details');
         } else {
-          this.toastService.error('Error: ' + result.message);
+          this.toastService.error('Error: ' + message);
         }
         this.loading = false;
       }
@@ -189,7 +167,9 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
     }
 
     this.loading = true;
-    this.results = [];
+    // Fill with pending placeholders
+    this.results = Array(10).fill({pending:true});
+    this.cdr.detectChanges();
     
     const requests = [];
     for (let i = 0; i < 10; i++) {
@@ -211,15 +191,14 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
               headers[key.toLowerCase()] = value;
             });
           }
-          
           const status = response.status || 200;
           this.results[index] = {
             status: status,
             message: response.body?.message || 'Success',
             headers: headers
           };
-          
           completed++;
+          this.cdr.detectChanges();
           if (completed === 10) {
             this.loading = false;
             this.toastService.info('All requests completed');
@@ -232,12 +211,9 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
               err.headers.keys().forEach((key: string) => {
                 headers[key.toLowerCase()] = err.headers.get(key);
               });
-            } catch (e) {
-              // Silently handle header extraction errors
-            }
+            } catch (e) { }
           }
-          
-          let message = 'Rate limit exceeded';
+          let message = 'Request failed';
           if (err.status === 429) {
             message = 'Rate limit exceeded. Status Code:429';
           } else if (err.error?.message) {
@@ -245,17 +221,16 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
           } else if (err.message) {
             message = err.message;
           }
-          
           this.results[index] = {
-            status: err.status || 429,
+            status: err.status || 'Error',
             message: message,
-            headers: headers
+            headers: headers,
+            error: true
           };
-          
           completed++;
+          this.cdr.detectChanges();
           if (completed === 10) {
             this.loading = false;
-            this.cdr.detectChanges(); // Force change detection
             this.toastService.info('All requests completed');
           }
         }
@@ -266,5 +241,10 @@ export class NotificationTestComponent implements OnInit, OnDestroy {
   hasHeaders(headers: any): boolean {
     return headers && typeof headers === 'object' && Object.keys(headers).length > 0;
   }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
 }
+
 

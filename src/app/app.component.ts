@@ -26,19 +26,26 @@ export class AppComponent implements AfterViewInit {
   activeTab = 0;
   @ViewChild('notificationTest') notificationTest?: NotificationTestComponent;
   @ViewChild('rateLimitConfig') rateLimitConfig?: RateLimitConfigComponent;
+  @ViewChild('systemLimitConfig') systemLimitConfig?: SystemLimitConfigComponent;
+  @ViewChild('clientManagement') clientManagement?: ClientManagementComponent;
 
   ngAfterViewInit() {
   }
 
   onTabChange(index: number) {
     this.activeTab = index;
-    // refresh clients when going to test notifications tab
-    if (index === 3 && this.notificationTest) {
-      this.notificationTest.onTabActivated();
+    // Automatically refresh data when switching tabs
+    if (index === 0 && this.systemLimitConfig) {
+      this.systemLimitConfig.loadConfig();
     }
-    // refresh clients when going to test rate limit tab
+    if (index === 1 && this.clientManagement) {
+      this.clientManagement.loadClients();
+    }
     if (index === 2 && this.rateLimitConfig) {
       this.rateLimitConfig.onTabActivated();
+    }
+    if (index === 3 && this.notificationTest) {
+      this.notificationTest.onTabActivated();
     }
   }
 }
